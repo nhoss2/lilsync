@@ -95,7 +95,6 @@ const processImage = async (
   bucketName: string
 ) => {
   const inputKey = imagesToCreate[0].inputKey;
-  console.log("processing key:", inputKey);
 
   if (!fileExtSupported(inputKey)) {
     console.warn(`skipping non-image file: ${inputKey}`);
@@ -138,10 +137,24 @@ export const processImages = async (
 ): Promise<State> => {
   const { imagesToCreate } = state;
 
-  const imageProcessingTasks = Object.keys(imagesToCreate).map((baseName) =>
-    limiter.schedule(() =>
-      processImage(baseName, imagesToCreate[baseName], inputConfig, bucketName)
-    )
+  const imageBaseNames = Object.keys(imagesToCreate);
+  const imageProcessingTasks = imageBaseNames.map((baseName, index) =>
+    limiter.schedule(() => {
+      const processWithLog = async () => {
+        console.log(
+          `${index + 1}/${imageBaseNames.length}: processing key ${
+            imagesToCreate[baseName][0].inputKey
+          }`
+        );
+        return processImage(
+          baseName,
+          imagesToCreate[baseName],
+          inputConfig,
+          bucketName
+        );
+      };
+      return processWithLog();
+    })
   );
 
   await Promise.all(imageProcessingTasks);

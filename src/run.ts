@@ -86,13 +86,20 @@ export const run = async (): Promise<void> => {
 
     const s3Client = await getClient();
 
+    console.log("building state");
+
     const state = await buildState(bucketName, inputConfig, s3Client);
 
     console.log("processing images");
 
     await processImages(state, inputConfig, bucketName);
 
-    await deleteUnmatchedImages(bucketName, state.unmatchedOutputImages);
+    if (state.unmatchedOutputImages.length > 0) {
+      console.log("deleting unmatched output images");
+      await deleteUnmatchedImages(bucketName, state.unmatchedOutputImages);
+    }
+
+    console.log("done!");
   } catch (err) {
     if (err instanceof Error) {
       console.error(err.message);

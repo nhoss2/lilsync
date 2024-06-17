@@ -202,14 +202,29 @@ export const buildState = async (
 ): Promise<State> => {
   const allFileKeys = await listBucketObjects(bucketName, s3Client);
 
+  console.log(`number of files: ${allFileKeys.length}`);
+
   const inputBaseNames = collectInputImages(allFileKeys, config);
+
+  console.log(`input images ${Object.keys(inputBaseNames).length}`);
+
   const publishedBaseNames = collectProcessedImages(
     allFileKeys,
     inputBaseNames,
     config
   );
 
+  const numOutputImages = Object.values(publishedBaseNames).reduce(
+    (num, curr) => {
+      return num + curr.length;
+    },
+    0
+  );
+  console.log(`output images already created: ${numOutputImages}`);
+
   const unmatchedOutputImages = findUnmatchedImages(publishedBaseNames);
+
+  console.log(`unmatched output images: ${unmatchedOutputImages.length}`);
 
   const missedImagesToCreate = getPartialProcessedImages(
     config,
@@ -222,6 +237,15 @@ export const buildState = async (
     publishedBaseNames,
     missedImagesToCreate
   );
+
+  const numImagesToCreate = Object.values(imagesToCreate).reduce(
+    (num, current) => {
+      return num + current.length;
+    },
+    0
+  );
+
+  console.log(`images to create: ${numImagesToCreate}`);
 
   return {
     config,
