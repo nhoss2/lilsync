@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "outDir": "./dist",
+    "removeComments": true,
+    "target": "ES6",
+
+    "baseUrl": "./src/",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    "noImplicitReturns": true,
+    "noUnusedLocals": false
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules/**/*"]
+}
