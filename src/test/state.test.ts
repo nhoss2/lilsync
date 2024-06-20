@@ -11,6 +11,7 @@ import type {
   InputImageMap,
   ImagesToCreate,
 } from "../types";
+import { logger } from "../logger";
 
 jest.mock("../s3", () => ({
   ...jest.requireActual("../s3"),
@@ -239,6 +240,18 @@ describe("getNewImages", () => {
 });
 
 describe("findUnmatchedImages", () => {
+  let loggerErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    loggerErrorSpy = jest
+      .spyOn(logger, "error")
+      .mockImplementation((infoObject: object) => logger);
+  });
+
+  afterEach(() => {
+    loggerErrorSpy.mockRestore();
+  });
+
   it("should find no unmatched images when all images have matching input images", () => {
     const publishedBaseNames: ProcessedImageMap = {
       image1: [
@@ -315,7 +328,7 @@ describe("findUnmatchedImages", () => {
     jest.spyOn(console, "error").mockImplementation(() => {});
 
     const result = findUnmatchedImages(publishedBaseNames);
-    expect(console.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       "there shouldnt be more than 1 unique sourceKey for a published image set. source keys: ",
       new Set(["images/image1.jpg", "images/image1_different.jpg"])
     );

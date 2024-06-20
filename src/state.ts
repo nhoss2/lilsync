@@ -14,6 +14,7 @@ import {
   findOutputConfig,
   findSourceKey,
 } from "./key";
+import { logger } from "./logger";
 import { listBucketObjects } from "./s3";
 
 export const collectInputImages = (
@@ -28,7 +29,7 @@ export const collectInputImages = (
       if (baseKey !== null) {
         if (baseKey in inputBaseKeys) {
           // TODO: test
-          console.warn(
+          logger.warn(
             `multiple input keys with the base name (excluding file extension). ignoring: ${key}`
           );
         } else {
@@ -80,7 +81,7 @@ export const findUnmatchedImages = (publishedBaseNames: ProcessedImageMap) => {
     const inputKeys = new Set(processedImages.map((img) => img.sourceKey));
 
     if (inputKeys.size !== 1) {
-      console.error(
+      logger.error(
         "there shouldnt be more than 1 unique sourceKey for a published image set. source keys: ",
         inputKeys
       );
@@ -117,7 +118,7 @@ export const getPartialProcessedImages = (
       uniqueSourceKeys.size === 1 ? imgs[0].sourceKey : undefined;
 
     if (inputKey === undefined) {
-      console.warn("unable to find input key for imgs: ", imgs);
+      logger.warn("unable to find input key for imgs: ", imgs);
       continue;
     }
 
@@ -213,11 +214,11 @@ export const buildState = async (
 
   const allFileKeys = [...inputFileKeys, ...outputFileKeys];
 
-  console.log(`number of files: ${allFileKeys.length}`);
+  logger.info(`number of files: ${allFileKeys.length}`);
 
   const inputBaseNames = collectInputImages(allFileKeys, config);
 
-  console.log(`input images ${Object.keys(inputBaseNames).length}`);
+  logger.info(`input images ${Object.keys(inputBaseNames).length}`);
 
   const publishedBaseNames = collectProcessedImages(
     allFileKeys,
@@ -231,11 +232,11 @@ export const buildState = async (
     },
     0
   );
-  console.log(`output images already created: ${numOutputImages}`);
+  logger.info(`output images already created: ${numOutputImages}`);
 
   const unmatchedOutputImages = findUnmatchedImages(publishedBaseNames);
 
-  console.log(`unmatched output images: ${unmatchedOutputImages.length}`);
+  logger.info(`unmatched output images: ${unmatchedOutputImages.length}`);
 
   const missedImagesToCreate = getPartialProcessedImages(
     config,
@@ -256,7 +257,7 @@ export const buildState = async (
     0
   );
 
-  console.log(`images to create: ${numImagesToCreate}`);
+  logger.info(`images to create: ${numImagesToCreate}`);
 
   return {
     config,

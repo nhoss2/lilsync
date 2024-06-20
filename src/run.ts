@@ -2,6 +2,7 @@ import { getClient } from "./s3";
 import { buildState } from "./state";
 import { processImages, deleteUnmatchedImages } from "./image";
 import { getConfig } from "./config";
+import { logger } from "./logger";
 
 export const run = async (): Promise<void> => {
   try {
@@ -10,25 +11,25 @@ export const run = async (): Promise<void> => {
 
     const s3Client = await getClient();
 
-    console.log("building state");
+    logger.info("building state");
 
     const state = await buildState(bucketName, inputConfig, s3Client);
 
-    console.log("processing images");
+    logger.info("processing images");
 
     await processImages(state, inputConfig, bucketName);
 
     if (state.unmatchedOutputImages.length > 0) {
-      console.log("deleting unmatched output images");
+      logger.info("deleting unmatched output images");
       await deleteUnmatchedImages(bucketName, state.unmatchedOutputImages);
     }
 
-    console.log("done!");
+    logger.info("done!");
   } catch (err) {
     if (err instanceof Error) {
-      console.error(err.message);
+      logger.error(err.message);
     } else {
-      console.error("An unknown error occurred.");
+      logger.error("An unknown error occurred.");
     }
     process.exit(1);
   }

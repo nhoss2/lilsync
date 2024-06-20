@@ -11,6 +11,8 @@ import type {
   GetObjectCommandOutput,
 } from "@aws-sdk/client-s3";
 
+import { logger } from "./logger";
+
 export const createS3Client = (
   accessKeyId: string,
   secretAccessKey: string,
@@ -67,7 +69,7 @@ export const listBucketObjects = async (
       isTruncated = data.IsTruncated ?? false;
       continuationToken = data.NextContinuationToken;
     } catch (err) {
-      console.error("Error listing bucket objects:", err);
+      logger.error("Error listing bucket objects:", err);
       break;
     }
   }
@@ -101,7 +103,7 @@ export const downloadImage = async (
 
     return streamToBuffer(data.Body as Readable);
   } catch (error) {
-    console.error(`Error downloading image for key ${key}:`, error);
+    logger.error(`Error downloading image for key ${key}:`, error);
     throw error;
   }
 };

@@ -5,7 +5,7 @@
   "description": "utility for downloading and reuploading optimised images from s3 compatible storage",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest src/test",
     "cli": "tsx src/cli.ts",
     "check": "tsx src/check.ts"
   },
@@ -13,8 +13,8 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.596.0",
+    "ansis": "^3.2.0",
     "bottleneck": "^2.19.5",
-    "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "cosmiconfig": "^9.0.0",
     "dotenv": "^16.4.5",

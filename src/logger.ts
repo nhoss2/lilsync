@@ -1,5 +1,5 @@
 import winston from "winston";
-import chalk from "chalk";
+import ansis from "ansis";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -7,11 +7,11 @@ export const logger = winston.createLogger({
     winston.format.printf(({ level, message }) => {
       let coloredMessage = message;
       if (level === "info") {
-        coloredMessage = chalk.white(message);
+        coloredMessage = ansis.white(message);
       } else if (level === "warn") {
-        coloredMessage = chalk.yellow(message);
+        coloredMessage = ansis.yellow(message);
       } else if (level === "error") {
-        coloredMessage = chalk.red(message);
+        coloredMessage = ansis.red(message);
       }
       return `${coloredMessage}`;
     })
