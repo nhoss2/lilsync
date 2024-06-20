@@ -200,7 +200,18 @@ export const buildState = async (
   config: InputConfig,
   s3Client: S3Client
 ): Promise<State> => {
-  const allFileKeys = await listBucketObjects(bucketName, s3Client);
+  const inputFileKeys = await listBucketObjects(
+    bucketName,
+    s3Client,
+    config.inputPath
+  );
+  const outputFileKeys = await listBucketObjects(
+    bucketName,
+    s3Client,
+    config.outputPath
+  );
+
+  const allFileKeys = [...inputFileKeys, ...outputFileKeys];
 
   console.log(`number of files: ${allFileKeys.length}`);
 
