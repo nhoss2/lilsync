@@ -21,14 +21,21 @@ const InputConfigSchema = z.object({
   outputImages: z.array(OutputImageConfigSchema).min(1),
 });
 
+const CredentialsSchema = z.object({
+  accessKeyId: z.string(),
+  secretKey: z.string(),
+  endpointUrl: z.string(),
+});
+
 const ConfigSchema = z.object({
   bucketName: z.string(),
   inputConfig: InputConfigSchema,
+  credentials: CredentialsSchema.optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
 
-const validateConfig = (config: unknown): Config => {
+export const validateConfig = (config: unknown): Config => {
   const configObj = ConfigSchema.parse(config);
   const { inputConfig } = configObj;
 
@@ -51,6 +58,28 @@ const validateConfig = (config: unknown): Config => {
   return configObj;
 };
 
+export const getCredentials = (configCredentials?: {
+  accessKeyId?: string;
+  secretKey?: string;
+  endpointUrl?: string;
+}) => {
+  const envCredentials = {
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretKey: process.env.SECRET_KEY,
+    endpointUrl: process.env.ENDPOINT_URL,
+  };
+
+  const finalCredentials = {
+    accessKeyId: configCredentials?.accessKeyId || envCredentials.accessKeyId,
+    secretKey: configCredentials?.secretKey || envCredentials.secretKey,
+    endpointUrl: configCredentials?.endpointUrl || envCredentials.endpointUrl,
+  };
+
+  const parsedCredentials = CredentialsSchema.parse(finalCredentials);
+
+  return parsedCredentials;
+};
+
 export const getConfig = (): Config => {
   try {
     const explorerSync = cosmiconfigSync("lilsync");
@@ -60,7 +89,10 @@ export const getConfig = (): Config => {
       throw new Error("configuration file not found or is empty");
     }
 
-    return validateConfig(result.config);
+    const config = validateConfig(result.config);
+    config.credentials = getCredentials(result.config.credentials);
+
+    return config;
   } catch (err) {
     if (err instanceof z.ZodError) {
       const formattedErrors = err.errors
