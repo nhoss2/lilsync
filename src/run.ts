@@ -11,8 +11,6 @@ export const run = async (): Promise<void> => {
 
     const s3Client = await getClient();
 
-    logger.info("building state");
-
     const state = await buildState(bucketName, inputConfig, s3Client);
 
     logger.info("processing images");

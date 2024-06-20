@@ -28,6 +28,29 @@ const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>;
 
+const validateConfig = (config: unknown): Config => {
+  const configObj = ConfigSchema.parse(config);
+  const { inputConfig } = configObj;
+
+  const outputImages = inputConfig.outputImages;
+  const dimensionSet = new Set<string>();
+
+  outputImages.forEach((image, index) => {
+    const dimensionKey = image.width
+      ? `width:${image.width}`
+      : `height:${image.height}`;
+    if (dimensionSet.has(dimensionKey)) {
+      throw new Error(
+        `Duplicate dimension found in OutputImageConfig at index ${index}: ${dimensionKey}`
+      );
+    }
+
+    dimensionSet.add(dimensionKey);
+  });
+
+  return configObj;
+};
+
 export const getConfig = (): Config => {
   try {
     const explorerSync = cosmiconfigSync("lilsync");
@@ -37,27 +60,7 @@ export const getConfig = (): Config => {
       throw new Error("configuration file not found or is empty");
     }
 
-    const configObj = ConfigSchema.parse(result.config);
-    const { inputConfig } = configObj;
-
-    const outputImages = inputConfig.outputImages;
-
-    const dimensionSet = new Set<string>();
-
-    outputImages.forEach((image, index) => {
-      const dimensionKey = image.width
-        ? `width:${image.width}`
-        : `height:${image.height}`;
-      if (dimensionSet.has(dimensionKey)) {
-        throw new Error(
-          `Duplicate dimension found in OutputImageConfig at index ${index}: ${dimensionKey}`
-        );
-      }
-
-      dimensionSet.add(dimensionKey);
-    });
-
-    return configObj;
+    return validateConfig(result.config);
   } catch (err) {
     if (err instanceof z.ZodError) {
       const formattedErrors = err.errors

@@ -6,8 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest src/test",
-    "cli": "tsx src/cli.ts",
-    "check": "tsx src/check.ts"
+    "cli": "tsx src/cli.ts"
   },
   "author": "nafis hossain <nafis@labs.im>",
   "license": "BSD-3-Clause",

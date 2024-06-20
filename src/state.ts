@@ -1,3 +1,4 @@
+import ansis from "ansis";
 import { S3Client } from "@aws-sdk/client-s3";
 
 import type {
@@ -201,6 +202,8 @@ export const buildState = async (
   config: InputConfig,
   s3Client: S3Client
 ): Promise<State> => {
+  logger.info(ansis.gray("building state"));
+
   const inputFileKeys = await listBucketObjects(
     bucketName,
     s3Client,
@@ -214,11 +217,13 @@ export const buildState = async (
 
   const allFileKeys = [...inputFileKeys, ...outputFileKeys];
 
-  logger.info(`number of files: ${allFileKeys.length}`);
+  logger.info(`number of files: ${ansis.green(String(allFileKeys.length))}`);
 
   const inputBaseNames = collectInputImages(allFileKeys, config);
 
-  logger.info(`input images ${Object.keys(inputBaseNames).length}`);
+  logger.info(
+    `input images: ${ansis.green(String(Object.keys(inputBaseNames).length))}`
+  );
 
   const publishedBaseNames = collectProcessedImages(
     allFileKeys,
@@ -232,11 +237,17 @@ export const buildState = async (
     },
     0
   );
-  logger.info(`output images already created: ${numOutputImages}`);
+  logger.info(
+    `output images already created: ${ansis.green(String(numOutputImages))}`
+  );
 
   const unmatchedOutputImages = findUnmatchedImages(publishedBaseNames);
 
-  logger.info(`unmatched output images: ${unmatchedOutputImages.length}`);
+  logger.info(
+    `unmatched output images: ${ansis.green(
+      String(unmatchedOutputImages.length)
+    )}`
+  );
 
   const missedImagesToCreate = getPartialProcessedImages(
     config,
@@ -257,7 +268,7 @@ export const buildState = async (
     0
   );
 
-  logger.info(`images to create: ${numImagesToCreate}`);
+  logger.info(`images to create: ${ansis.green(String(numImagesToCreate))}`);
 
   return {
     config,
