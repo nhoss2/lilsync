@@ -12,6 +12,7 @@ import type {
 } from "@aws-sdk/client-s3";
 
 import { logger } from "./logger";
+import { getConfig } from "./config";
 
 export const createS3Client = (
   accessKeyId: string,
@@ -30,11 +31,9 @@ export const createS3Client = (
 };
 
 export const getClient = async () => {
-  const accessKeyId = process.env.ACCESS_KEY_ID!;
-  const secretAccessKey = process.env.SECRET_KEY!;
-  const endpointUrl = process.env.ENDPOINT_URL!;
-
-  return createS3Client(accessKeyId, secretAccessKey, endpointUrl);
+  const config = getConfig();
+  const { accessKeyId, secretKey, endpointUrl } = config.credentials!;
+  return createS3Client(accessKeyId, secretKey, endpointUrl);
 };
 
 export const listBucketObjects = async (
