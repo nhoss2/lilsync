@@ -325,8 +325,6 @@ describe("findUnmatchedImages", () => {
       ],
     };
 
-    jest.spyOn(console, "error").mockImplementation(() => {});
-
     const result = findUnmatchedImages(publishedBaseNames);
     expect(logger.error).toHaveBeenCalledWith(
       "there shouldnt be more than 1 unique sourceKey for a published image set. source keys: ",

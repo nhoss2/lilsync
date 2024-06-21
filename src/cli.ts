@@ -17,8 +17,13 @@ program
   .description(
     "check how many images have been processed and need to be processed"
   )
-  .action(async () => {
-    await checkState();
+  .option(
+    "-O, --output <file_location>",
+    "Specify the file path where a state file will be saved"
+  )
+  .action(async (options: { output?: string }) => {
+    const { output } = options;
+    await checkState(output);
   });
 
 program.parse(process.argv);

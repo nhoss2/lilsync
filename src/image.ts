@@ -12,6 +12,7 @@ import {
   Ext,
 } from "./types";
 import { downloadImage, uploadImage, getClient, deleteImage } from "./s3";
+import { logger } from "./logger";
 
 const limiter = new Bottleneck({
   maxConcurrent: 15,
@@ -31,7 +32,7 @@ const downloadImageAndGetMetadata = async (
     const metadata = await sharp(imageBuffer).metadata(); // Throws an error if not a valid image
     return { imageBuffer, metadata };
   } catch (error) {
-    console.error(`Error processing image for key ${key}:`, error);
+    logger.error(`Error processing image for key ${key}: %o`, error);
     return null;
   }
 };
@@ -69,7 +70,7 @@ const processAndUploadImage = async (
       `${inputBaseKey}_${outputMetadata.width}x${outputMetadata.height}.${outputMetadata.format}`
     );
 
-    console.log("output:", outputKey);
+    logger.info("output: %o", outputKey);
 
     await uploadImage(
       bucketName,
@@ -97,7 +98,7 @@ const processImage = async (
   const inputKey = imagesToCreate[0].inputKey;
 
   if (!fileExtSupported(inputKey)) {
-    console.warn(`skipping non-image file: ${inputKey}`);
+    logger.warn(`skipping non-image file: ${inputKey}`);
     return null;
   }
 
@@ -141,7 +142,7 @@ export const processImages = async (
   const imageProcessingTasks = imageBaseNames.map((baseName, index) =>
     limiter.schedule(() => {
       const processWithLog = async () => {
-        console.log(
+        logger.info(
           `${index + 1}/${imageBaseNames.length}: processing key ${
             imagesToCreate[baseName][0].inputKey
           }`
