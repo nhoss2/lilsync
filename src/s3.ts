@@ -1,18 +1,18 @@
-import { Readable } from "stream";
+import type { Readable } from "stream";
 import {
-  S3Client,
-  ListObjectsV2Command,
-  GetObjectCommand,
-  PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
 } from "@aws-sdk/client-s3";
 import type {
-  ListObjectsV2CommandOutput,
   GetObjectCommandOutput,
+  ListObjectsV2CommandOutput,
 } from "@aws-sdk/client-s3";
 
-import { logger } from "./logger";
 import { getConfig } from "./config";
+import { logger } from "./logger";
 
 export const createS3Client = (
   accessKeyId: string,
@@ -41,7 +41,7 @@ export const listBucketObjects = async (
   s3Client: S3Client,
   prefix?: string
 ): Promise<string[]> => {
-  let allObjects: string[] = [];
+  const allObjects: string[] = [];
   let isTruncated = true;
   let continuationToken: string | undefined = undefined;
 

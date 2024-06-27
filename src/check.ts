@@ -1,11 +1,12 @@
-import * as path from "path";
 import { promises as fs } from "fs";
-import { S3Client } from "@aws-sdk/client-s3";
+import * as path from "path";
+import type { S3Client } from "@aws-sdk/client-s3";
+import ansis from "ansis";
 
-import { getClient } from "./s3";
-import { buildState } from "./state";
 import { getConfig } from "./config";
 import { logger } from "./logger";
+import { getClient } from "./s3";
+import { buildState } from "./state";
 
 export const checkState = async (
   outputPath: string | undefined
@@ -33,7 +34,7 @@ export const checkState = async (
         JSON.stringify(state, null, 2),
         "utf8"
       );
-      logger.info(`State written to ${absoluteOutputPath}`);
+      logger.info(ansis.green(`State written to ${absoluteOutputPath}`));
     }
   } catch (err) {
     if (err instanceof Error) {

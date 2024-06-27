@@ -1,6 +1,6 @@
 import { cosmiconfigSync } from "cosmiconfig";
 
-import { getConfig, validateConfig, getCredentials } from "../config";
+import { getConfig, getCredentials, validateConfig } from "../config";
 
 jest.mock("cosmiconfig");
 jest.mock("dotenv");

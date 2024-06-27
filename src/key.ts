@@ -1,6 +1,6 @@
 import path from "path";
 
-import type { InputConfig, OutputImageConfig, InputImageMap } from "./types";
+import type { InputConfig, InputImageMap, OutputImageConfig } from "./types";
 
 export const getBaseKeyFromInputKey = (
   key: string,

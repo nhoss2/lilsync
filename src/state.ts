@@ -1,22 +1,22 @@
+import type { S3Client } from "@aws-sdk/client-s3";
 import ansis from "ansis";
-import { S3Client } from "@aws-sdk/client-s3";
 
-import type {
-  State,
-  InputConfig,
-  ProcessedImage,
-  ProcessedImageMap,
-  InputImageMap,
-  ImagesToCreate,
-} from "./types";
 import {
-  getBaseKeyFromInputKey,
-  getBaseKeyFromPublishedKey,
   findOutputConfig,
   findSourceKey,
+  getBaseKeyFromInputKey,
+  getBaseKeyFromPublishedKey,
 } from "./key";
 import { logger } from "./logger";
 import { listBucketObjects } from "./s3";
+import type {
+  ImagesToCreate,
+  InputConfig,
+  InputImageMap,
+  ProcessedImage,
+  ProcessedImageMap,
+  State,
+} from "./types";
 
 export const collectInputImages = (
   allFileKeys: string[],

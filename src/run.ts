@@ -1,8 +1,8 @@
+import { getConfig } from "./config";
+import { deleteUnmatchedImages, processImages } from "./image";
+import { logger } from "./logger";
 import { getClient } from "./s3";
 import { buildState } from "./state";
-import { processImages, deleteUnmatchedImages } from "./image";
-import { getConfig } from "./config";
-import { logger } from "./logger";
 
 export const run = async (): Promise<void> => {
   try {

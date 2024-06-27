@@ -1,5 +1,5 @@
-import * as dotenv from "dotenv";
 import { cosmiconfigSync } from "cosmiconfig";
+import * as dotenv from "dotenv";
 import { z } from "zod";
 
 import { supportedFileTypes } from "./types";

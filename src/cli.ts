@@ -1,7 +1,7 @@
 import { Command } from "commander";
 
-import { run } from "./run";
 import { checkState } from "./check";
+import { run } from "./run";
 
 const program = new Command();
 

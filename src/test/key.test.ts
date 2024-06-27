@@ -1,10 +1,10 @@
-import type { InputConfig, OutputImageConfig } from "../types";
 import {
+  findOutputConfig,
   getBaseKeyFromInputKey,
   getBaseKeyFromPublishedKey,
-  findOutputConfig,
   parseDimensionsFromKey,
 } from "../key";
+import type { InputConfig, OutputImageConfig } from "../types";
 
 describe("getBaseKeyFromInputKey", () => {
   const config: InputConfig = {

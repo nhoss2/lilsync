@@ -1,18 +1,19 @@
 import path from "path";
-import sharp from "sharp";
+import type { S3Client } from "@aws-sdk/client-s3";
+import ansis from "ansis";
 import Bottleneck from "bottleneck";
-import { S3Client } from "@aws-sdk/client-s3";
+import sharp from "sharp";
 
-import {
-  State,
-  InputConfig,
-  OutputImageConfig,
-  ImageToCreate,
-  supportedFileTypes,
-  Ext,
-} from "./types";
-import { downloadImage, uploadImage, getClient, deleteImage } from "./s3";
 import { logger } from "./logger";
+import { deleteImage, downloadImage, getClient, uploadImage } from "./s3";
+import {
+  type Ext,
+  type ImageToCreate,
+  type InputConfig,
+  type OutputImageConfig,
+  type State,
+  supportedFileTypes,
+} from "./types";
 
 const limiter = new Bottleneck({
   maxConcurrent: 15,
@@ -70,7 +71,7 @@ const processAndUploadImage = async (
       `${inputBaseKey}_${outputMetadata.width}x${outputMetadata.height}.${outputMetadata.format}`
     );
 
-    logger.info("output: %o", outputKey);
+    logger.info(ansis.gray(`output: ${outputKey}`));
 
     await uploadImage(
       bucketName,

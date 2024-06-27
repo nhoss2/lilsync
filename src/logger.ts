@@ -1,9 +1,10 @@
-import winston from "winston";
 import ansis from "ansis";
+import winston from "winston";
 
 export const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
+    winston.format.splat(),
     winston.format.printf(({ level, message }) => {
       let coloredMessage = message;
       if (level === "info") {

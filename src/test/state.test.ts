@@ -1,17 +1,17 @@
+import { logger } from "../logger";
 import {
-  collectProcessedImages,
   collectInputImages,
-  getNewImages,
+  collectProcessedImages,
   findUnmatchedImages,
+  getNewImages,
   getPartialProcessedImages,
 } from "../state";
 import type {
-  InputConfig,
-  ProcessedImageMap,
-  InputImageMap,
   ImagesToCreate,
+  InputConfig,
+  InputImageMap,
+  ProcessedImageMap,
 } from "../types";
-import { logger } from "../logger";
 
 jest.mock("../s3", () => ({
   ...jest.requireActual("../s3"),
