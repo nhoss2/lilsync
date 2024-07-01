@@ -3,6 +3,7 @@ import type { S3Client } from "@aws-sdk/client-s3";
 import ansis from "ansis";
 import Bottleneck from "bottleneck";
 import sharp from "sharp";
+import ExifParser from "exif-parser";
 
 import { logger } from "./logger";
 import { deleteImage, downloadImage, getClient, uploadImage } from "./s3";
@@ -22,6 +23,7 @@ const limiter = new Bottleneck({
 type ImageWithMetadata = {
   imageBuffer: Buffer;
   metadata: sharp.Metadata;
+  exifCreated?: number | null;
 };
 const downloadImageAndGetMetadata = async (
   bucketName: string,
@@ -31,7 +33,8 @@ const downloadImageAndGetMetadata = async (
   try {
     const imageBuffer = await downloadImage(bucketName, key, s3Client);
     const metadata = await sharp(imageBuffer).metadata(); // Throws an error if not a valid image
-    return { imageBuffer, metadata };
+    const exifCreated = await parseExifData(imageBuffer);
+    return { imageBuffer, metadata, exifCreated };
   } catch (error) {
     logger.error(`Error processing image for key ${key}: %o`, error);
     return null;
@@ -50,7 +53,7 @@ const processAndUploadImage = async (
     const { width, height, ext = "jpeg", quality = 85 } = outputConfig;
 
     let processedImage;
-    const { metadata, imageBuffer } = inputImageData;
+    const { metadata, imageBuffer, exifCreated } = inputImageData;
 
     if (
       (width !== undefined && metadata.width! > width) ||
@@ -66,10 +69,25 @@ const processAndUploadImage = async (
     const processedImageBuffer = await processedImage.toBuffer();
     const outputMetadata = await sharp(processedImageBuffer).metadata();
 
+    if (
+      outputMetadata.width === undefined ||
+      outputMetadata.height === undefined
+    )
+      return;
+
     const outputKey = path.join(
       outputPath,
       `${inputBaseKey}_${outputMetadata.width}x${outputMetadata.height}.${outputMetadata.format}`
     );
+
+    const fileMetadata: Record<string, string> = {
+      width: outputMetadata.width.toString(),
+      height: outputMetadata.height.toString(),
+    };
+
+    if (exifCreated) {
+      fileMetadata.created = String(exifCreated);
+    }
 
     logger.info(ansis.gray(`output: ${outputKey}`));
 
@@ -78,8 +96,7 @@ const processAndUploadImage = async (
       outputKey,
       processedImageBuffer,
       s3Client,
-      outputMetadata.width!,
-      outputMetadata.height!
+      fileMetadata
     );
   }
 };
@@ -172,5 +189,16 @@ export const deleteUnmatchedImages = async (
 
   for (const unmatchedOutputImageKey of unmatchedOutputImageKeys) {
     await deleteImage(bucketName, unmatchedOutputImageKey, s3Client);
+  }
+};
+
+const parseExifData = async (imgData: Buffer): Promise<number | null> => {
+  try {
+    const parser = ExifParser.create(imgData);
+    const result = parser.parse();
+
+    return (result.tags.DateTimeOriginal || result.tags.CreateDate) ?? null;
+  } catch (err) {
+    return null;
   }
 };
