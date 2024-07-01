@@ -112,13 +112,15 @@ export const uploadImage = async (
   key: string,
   body: Buffer,
   s3Client: S3Client,
-  metadata: Record<string, string>
+  metadata: Record<string, string>,
+  contentType: string | undefined
 ): Promise<void> => {
   const params = {
     Bucket: bucketName,
     Key: key,
     Body: body,
     Metadata: metadata,
+    ContentType: contentType,
   };
 
   await s3Client.send(new PutObjectCommand(params));

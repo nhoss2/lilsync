@@ -41,7 +41,7 @@ const downloadImageAndGetMetadata = async (
   }
 };
 
-const processAndUploadImage = async (
+export const processAndUploadImage = async (
   inputBaseKey: string,
   inputImageData: ImageWithMetadata,
   outputConfigs: OutputImageConfig[],
@@ -91,12 +91,15 @@ const processAndUploadImage = async (
 
     logger.info(ansis.gray(`output: ${outputKey}`));
 
+    const contentType = deriveContentType(outputMetadata.format);
+
     await uploadImage(
       bucketName,
       outputKey,
       processedImageBuffer,
       s3Client,
-      fileMetadata
+      fileMetadata,
+      contentType
     );
   }
 };
@@ -200,5 +203,27 @@ const parseExifData = async (imgData: Buffer): Promise<number | null> => {
     return (result.tags.DateTimeOriginal || result.tags.CreateDate) ?? null;
   } catch (err) {
     return null;
+  }
+};
+
+const deriveContentType = (format: string | undefined): string | undefined => {
+  switch (format?.toLowerCase()) {
+    case "jpeg":
+    case "jpg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "webp":
+      return "image/webp";
+    case "gif":
+      return "image/gif";
+    case "svg":
+      return "image/svg+xml";
+    case "tiff":
+      return "image/tiff";
+    case "avif":
+      return "image/avif";
+    default:
+      return undefined;
   }
 };
