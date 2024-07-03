@@ -119,7 +119,7 @@ export const getPartialProcessedImages = (
       uniqueSourceKeys.size === 1 ? imgs[0].sourceKey : undefined;
 
     if (inputKey === undefined) {
-      logger.warn("unable to find input key for imgs: ", imgs);
+      logger.debug("unable to find input key for imgs: %o", imgs);
       continue;
     }
 

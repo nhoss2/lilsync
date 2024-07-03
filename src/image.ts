@@ -60,6 +60,7 @@ export const processAndUploadImage = async (
       (height !== undefined && metadata.height! > height)
     ) {
       processedImage = sharp(imageBuffer)
+        .rotate()
         .resize(width, height)
         .toFormat(ext, { quality });
     } else {
@@ -188,11 +189,27 @@ export const deleteUnmatchedImages = async (
   bucketName: string,
   unmatchedOutputImageKeys: string[]
 ) => {
-  const s3Client = await getClient();
+  const deleteTasks = unmatchedOutputImageKeys.map(
+    (unmatchedOutputImageKey, index) => {
+      limiter.schedule(() => {
+        const deleteWithLog = async () => {
+          logger.info(
+            ansis.gray(
+              `${index + 1}/${
+                unmatchedOutputImageKeys.length
+              }: deleting key ${unmatchedOutputImageKey}`
+            )
+          );
+          const s3Client = await getClient();
+          return deleteImage(bucketName, unmatchedOutputImageKey, s3Client);
+        };
 
-  for (const unmatchedOutputImageKey of unmatchedOutputImageKeys) {
-    await deleteImage(bucketName, unmatchedOutputImageKey, s3Client);
-  }
+        return deleteWithLog();
+      });
+    }
+  );
+
+  await Promise.all(deleteTasks);
 };
 
 const parseExifData = async (imgData: Buffer): Promise<number | null> => {
