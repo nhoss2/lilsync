@@ -2,6 +2,7 @@ import { Command } from "commander";
 
 import { checkState } from "./check";
 import { run } from "./run";
+import { deletePath } from "delete";
 
 const program = new Command();
 
@@ -24,6 +25,18 @@ program
   .action(async (options: { output?: string }) => {
     const { output } = options;
     await checkState(output);
+  });
+
+program
+  .command("delete <path>")
+  .option("-s, --show-files", "show files")
+  .option("-f, --force", "skip confirmation")
+  .description(
+    "delete all files in the configured bucket based on the input path"
+  )
+  .action(async (path: string, options: { showFiles?: boolean }) => {
+    const { showFiles } = options;
+    await deletePath(path, showFiles);
   });
 
 program.parse(process.argv);

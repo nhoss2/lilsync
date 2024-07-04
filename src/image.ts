@@ -6,7 +6,7 @@ import sharp from "sharp";
 import ExifParser from "exif-parser";
 
 import { logger } from "./logger";
-import { deleteImage, downloadImage, getClient, uploadImage } from "./s3";
+import { deleteFilesBulk, downloadImage, getClient, uploadImage } from "./s3";
 import {
   type Ext,
   type ImageToCreate,
@@ -183,33 +183,6 @@ export const processImages = async (
   await Promise.all(imageProcessingTasks);
 
   return state;
-};
-
-export const deleteUnmatchedImages = async (
-  bucketName: string,
-  unmatchedOutputImageKeys: string[]
-) => {
-  const deleteTasks = unmatchedOutputImageKeys.map(
-    (unmatchedOutputImageKey, index) => {
-      limiter.schedule(() => {
-        const deleteWithLog = async () => {
-          logger.info(
-            ansis.gray(
-              `${index + 1}/${
-                unmatchedOutputImageKeys.length
-              }: deleting key ${unmatchedOutputImageKey}`
-            )
-          );
-          const s3Client = await getClient();
-          return deleteImage(bucketName, unmatchedOutputImageKey, s3Client);
-        };
-
-        return deleteWithLog();
-      });
-    }
-  );
-
-  await Promise.all(deleteTasks);
 };
 
 const parseExifData = async (imgData: Buffer): Promise<number | null> => {

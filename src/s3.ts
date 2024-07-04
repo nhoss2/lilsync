@@ -1,4 +1,6 @@
 import type { Readable } from "stream";
+import Bottleneck from "bottleneck";
+import ansis from "ansis";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -126,7 +128,31 @@ export const uploadImage = async (
   await s3Client.send(new PutObjectCommand(params));
 };
 
-export const deleteImage = async (
+export const deleteFilesBulk = async (
+  bucketName: string,
+  fileKeys: string[]
+) => {
+  const limiter = new Bottleneck({
+    maxConcurrent: 25,
+  });
+  const deleteTasks = fileKeys.map((fileKey, index) =>
+    limiter.schedule(() => {
+      const deleteWithLog = async () => {
+        logger.info(
+          ansis.gray(`${index + 1}/${fileKeys.length}: deleting key ${fileKey}`)
+        );
+        const s3Client = await getClient();
+        return await deleteFile(bucketName, fileKey, s3Client);
+      };
+
+      return deleteWithLog();
+    })
+  );
+
+  await Promise.all(deleteTasks);
+};
+
+export const deleteFile = async (
   bucketName: string,
   key: string,
   s3Client: S3Client
