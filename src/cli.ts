@@ -9,8 +9,13 @@ const program = new Command();
 program
   .command("run")
   .description("process all images")
-  .action(async () => {
-    await run();
+  .option(
+    "--delete",
+    "Delete output images that dont have a matching input image"
+  )
+  .action(async (options: { delete?: boolean }) => {
+    const { delete: deleteUnmatched } = options;
+    await run(deleteUnmatched);
   });
 
 program

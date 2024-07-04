@@ -4,7 +4,7 @@ import { logger } from "./logger";
 import { getClient, deleteFilesBulk } from "./s3";
 import { buildState } from "./state";
 
-export const run = async (): Promise<void> => {
+export const run = async (deleteUnmatched?: boolean): Promise<void> => {
   try {
     const config = getConfig();
     const { bucketName, inputConfig } = config;
@@ -17,7 +17,7 @@ export const run = async (): Promise<void> => {
 
     await processImages(state, inputConfig, bucketName);
 
-    if (state.unmatchedOutputImages.length > 0) {
+    if (state.unmatchedOutputImages.length > 0 && deleteUnmatched) {
       logger.info("deleting unmatched output images");
       await deleteFilesBulk(bucketName, state.unmatchedOutputImages);
     }
