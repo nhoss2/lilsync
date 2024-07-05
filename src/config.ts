@@ -82,7 +82,10 @@ export const getCredentials = (configCredentials?: {
 
 export const getConfig = (): Config => {
   try {
-    const explorerSync = cosmiconfigSync("lilsync");
+    const explorerSync = cosmiconfigSync("lilsync", {
+      searchStrategy: "global",
+      stopDir: "/",
+    });
     const result = explorerSync.search();
 
     if (!result || !result.config) {
