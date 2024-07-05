@@ -3,10 +3,11 @@
     "lib": ["ESNext"],
     "outDir": "./dist",
     "removeComments": true,
-    "target": "ES6",
+    "target": "ESNext",
 
     "baseUrl": "./src/",
     "esModuleInterop": true,
+    "module": "ESNext",
     "moduleResolution": "node",
 
     "strict": true,

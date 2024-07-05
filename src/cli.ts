@@ -1,8 +1,10 @@
+#!/usr/bin/env node
+
 import { Command } from "commander";
 
 import { checkState } from "./check";
 import { run } from "./run";
-import { deletePath } from "delete";
+import { deletePath } from "./delete";
 
 const program = new Command();
 
