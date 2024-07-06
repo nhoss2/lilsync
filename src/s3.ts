@@ -1,3 +1,5 @@
+import * as path from "path";
+import * as fs from "fs/promises";
 import type { Readable } from "stream";
 import Bottleneck from "bottleneck";
 import ansis from "ansis";
@@ -15,6 +17,7 @@ import type {
 
 import { getConfig } from "./config";
 import { logger } from "./logger";
+import { deriveContentType } from "./utils";
 
 export const createS3Client = (
   accessKeyId: string,
@@ -164,4 +167,64 @@ export const deleteFile = async (
 
   const command = new DeleteObjectCommand(deleteParams);
   await s3Client.send(command);
+};
+
+export const uploadFilesBulk = async (
+  bucketName: string,
+  srcPath: string,
+  destPath: string,
+  filePaths: string[]
+) => {
+  const limiter = new Bottleneck({
+    maxConcurrent: 25,
+  });
+
+  const s3Client = await getClient();
+
+  const uploadTasks = filePaths.map((filePath, index) =>
+    limiter.schedule(() => {
+      const uploadWithLog = async () => {
+        const relativePath = path.relative(srcPath, filePath);
+        const s3Key = path.join(destPath, relativePath).replace(/\\/g, "/");
+        logger.info(
+          ansis.gray(
+            `${index + 1}/${
+              filePaths.length
+            }: uploading ${filePath} to ${bucketName}/${s3Key}`
+          )
+        );
+        return await uploadFile(bucketName, s3Client, filePath, s3Key);
+      };
+
+      return uploadWithLog();
+    })
+  );
+
+  await Promise.all(uploadTasks);
+};
+
+const uploadFile = async (
+  bucketName: string,
+  s3Client: S3Client,
+  filePath: string,
+  s3Key: string
+) => {
+  try {
+    const fileContent = await fs.readFile(filePath);
+    const fileExtension = path.extname(filePath).toLowerCase().slice(1);
+    const contentType = deriveContentType(fileExtension);
+
+    const params = {
+      Bucket: bucketName,
+      Key: s3Key,
+      Body: fileContent,
+      ContentType: contentType,
+    };
+
+    const command = new PutObjectCommand(params);
+    await s3Client.send(command);
+  } catch (error) {
+    logger.error(`Error uploading file ${filePath}:`, error);
+    throw error;
+  }
 };

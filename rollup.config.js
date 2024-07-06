@@ -28,5 +28,6 @@ export default {
     "sharp",
     "winston",
     "zod",
+    "glob",
   ],
 };

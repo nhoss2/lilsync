@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { checkState } from "./check";
 import { run } from "./run";
 import { deletePath } from "./delete";
+import { uploadPath } from "./file";
 
 const program = new Command();
 
@@ -33,6 +34,24 @@ program
     const { output } = options;
     await checkState(output);
   });
+
+program
+  .command("upload <src> <dest>")
+  .option("-s, --show-files", "show files")
+  .option("-f, --force", "skip confirmation")
+  .description(
+    "upload all files from src directory to dest in the remote bucket"
+  )
+  .action(
+    async (
+      src: string,
+      dest: string,
+      options: { showFiles?: boolean; force?: boolean }
+    ) => {
+      const { showFiles, force } = options;
+      await uploadPath(src, dest, { showFiles, force });
+    }
+  );
 
 program
   .command("delete <path>")

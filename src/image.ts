@@ -6,7 +6,8 @@ import sharp from "sharp";
 import ExifParser from "exif-parser";
 
 import { logger } from "./logger";
-import { deleteFilesBulk, downloadImage, getClient, uploadImage } from "./s3";
+import { downloadImage, getClient, uploadImage } from "./s3";
+import { deriveContentType } from "./utils";
 import {
   type Ext,
   type ImageToCreate,
@@ -193,27 +194,5 @@ const parseExifData = async (imgData: Buffer): Promise<number | null> => {
     return (result.tags.DateTimeOriginal || result.tags.CreateDate) ?? null;
   } catch (err) {
     return null;
-  }
-};
-
-const deriveContentType = (format: string | undefined): string | undefined => {
-  switch (format?.toLowerCase()) {
-    case "jpeg":
-    case "jpg":
-      return "image/jpeg";
-    case "png":
-      return "image/png";
-    case "webp":
-      return "image/webp";
-    case "gif":
-      return "image/gif";
-    case "svg":
-      return "image/svg+xml";
-    case "tiff":
-      return "image/tiff";
-    case "avif":
-      return "image/avif";
-    default:
-      return undefined;
   }
 };
