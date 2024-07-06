@@ -41,10 +41,12 @@ program
   .description(
     "delete all files in the configured bucket based on the input path"
   )
-  .action(async (path: string, options: { showFiles?: boolean }) => {
-    const { showFiles } = options;
-    await deletePath(path, showFiles);
-  });
+  .action(
+    async (path: string, options: { showFiles?: boolean; force?: boolean }) => {
+      const { showFiles, force } = options;
+      await deletePath(path, showFiles, force);
+    }
+  );
 
 program.parse(process.argv);
 
